@@ -1,0 +1,43 @@
+[
+  {
+    "name": "首页",
+    "icon": "&#xe68e;",
+    "url": "user_home.html",
+    "hidden": false,
+    "list": []
+  },
+  {
+    "name": "短信管理",
+    "icon": "&#xe609;",
+    "url": "",
+    "hidden": false,
+    "list": [
+      {
+        "name": "发送短信",
+        "url": "send_sms.html"
+      }
+    ]
+  },
+  {
+    "name": "系统设置",
+    "icon": "&#xe620;",
+    "url": "",
+    "hidden": false,
+    "list": [
+      {
+        "name": "我的钱包",
+        "url": "user_wallet.html"
+      },
+      {
+        "name": "修改密码",
+        "url": "web_pwd.html"
+      }
+    ]
+  },
+  {
+    "name": "退出登录",
+    "icon": "&#xe65c;",
+    "url": "user_login.html",
+    "list": []
+  }
+]

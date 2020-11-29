@@ -1,0 +1,71 @@
+[
+  {
+    "name": "首页",
+    "icon": "&#xe68e;",
+    "url": "index.html",
+    "hidden": false,
+    "list": []
+  },
+  {
+    "name": "用户管理",
+    "icon": "&#xe612;",
+    "url": "",
+    "hidden": false,
+    "list": [
+      {
+        "name": "用户列表",
+        "url": "user_index.html"
+      },
+      {
+        "name": "添加用户",
+        "url": "user_add.html"
+      }
+    ]
+  },
+  {
+    "name": "短信管理",
+    "icon": "&#xe609;",
+    "url": "",
+    "hidden": false,
+    "list": [
+      {
+        "name": "短信列表",
+        "url": "sms_index.html"
+      },
+      {
+        "name": "发送短信",
+        "url": "send_sms.html"
+      }
+    ]
+  },
+  {
+    "name": "系统设置",
+    "icon": "&#xe620;",
+    "url": "",
+    "hidden": false,
+    "list": [
+      {
+        "name": "API列表",
+        "url": "sms_setting.html"
+      },
+      {
+        "name": "添加API",
+        "url": "sms_add.html"
+      },
+      {
+        "name": "设置成功率",
+        "url": "sms_success.html"
+      },
+      {
+        "name": "修改密码",
+        "url": "web_pwd.html"
+      }
+    ]
+  },
+  {
+    "name": "退出登录",
+    "icon": "&#xe65c;",
+    "url": "login.html",
+    "list": []
+  }
+]

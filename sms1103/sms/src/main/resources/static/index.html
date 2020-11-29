@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>短信后台</title>
+    <link rel="stylesheet" href="./static/common/layui/css/layui.css">
+    <link rel="stylesheet" href="./static/admin/css/style.css">
+    <script src="./static/common/layui/layui.js"></script>
+
+    <script src="./static/common/jquery-3.3.1.min.js"></script>
+    <script src="./static/common/vue.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            let type = localStorage.getItem("type");
+            if(type === "0"){
+                alert("普通用户没有访问权限");
+                window.location.href = "./user_login.html";
+            }
+
+            var smsdto = {};
+            smsdto.page = 1;
+            smsdto.size = 10;
+
+            var token = localStorage.getItem("token");
+
+            $.ajax({
+                url: './user/findUserNumber',
+                method: 'get',
+                beforeSend: function (request) {
+                    request.setRequestHeader("X-Auth-Token", token);
+                },
+                type: "GET",
+                contentType: "application/json",
+                success: function (res) {
+                    console.info(res)
+                    document.getElementById('balance').innerHTML = res.data.balance;
+                    document.getElementById('count').innerHTML = res.data.count;
+                },
+                error: function (data) {
+                    console.error(data)
+                }
+            })
+
+
+            $.ajax({
+                url: './sms/findSMSPage',
+                method: 'post',
+                beforeSend: function (request) {
+                    request.setRequestHeader("X-Auth-Token", token);
+                },
+                data: JSON.stringify(smsdto),
+                type: "POST",
+                contentType: "application/json",
+                success: function (res) {
+                    if (res.status !== 200) {
+                        alert("请重新登录")
+                        window.location.href = "./login.html";
+                    } else {
+                        var tableData = res.data.content;
+                        console.info(tableData)
+                        $.each(tableData, function (i, n) {  //回显到表格
+                            var row = $("#template").clone();
+                            row.find("#smsId").text(n.smsId);
+                            row.find("#sender").text(n.sender);
+                            row.find("#receiver").text(n.receiver);
+                            row.find("#unitPrice").text(n.unitPrice);
+                            row.find("#content").text(n.content);
+                            row.find("#sendTime").text(n.sendTime);
+                            row.appendTo("#sms_table");//添加到模板的容器中
+                        });
+                        document.getElementById('total').innerHTML = res.data.totalElements;
+
+
+                        var date = new Date();
+                        smsdto.sendTime = date.format("yyyy-MM-dd hh:mm:ss");
+                        $.ajax({
+                            url: './sms/findSMSPage',
+                            method: 'post',
+                            beforeSend: function (request) {
+                                request.setRequestHeader("X-Auth-Token", token);
+                            },
+                            data: JSON.stringify(smsdto),
+                            type: "POST",
+                            contentType: "application/json",
+                            success: function (res) {
+                                console.info(res)
+                                if (res.status !== 200) {
+                                    alert("系统错误")
+                                } else {
+                                    document.getElementById('today').innerHTML = res.data.totalElements;
+                                }
+                            },
+                            error: function (data) {
+                                console.error(res)
+                            }
+                        });
+                    }
+                },
+                error: function (data) {
+                    console.error(res)
+                }
+            });
+        })
+
+        Date.prototype.format = function (fmt) {
+            var o = {
+                "M+": this.getMonth() + 1, //月份
+                "d+": this.getDate(), //日
+                "h+": this.getHours(), //小时
+                "m+": this.getMinutes(), //分
+                "s+": this.getSeconds(), //秒
+                "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+                "S": this.getMilliseconds() //毫秒
+            };
+            if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            for (var k in o)
+                if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+            return fmt;
+        }
+    </script>
+    <style>
+        .right h2 {
+            margin: 10px 0;
+        }
+
+        .right li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <!--顶栏-->
+    <header>
+        <h1 v-text="webname"></h1>
+        <div class="breadcrumb">
+            <i class="layui-icon">&#xe715;</i>
+            <ul>
+                <li v-for="vo in address">
+                    <a v-text="vo.name" :href="vo.url"></a> <span>/</span>
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    <div class="main" id="app">
+        <!--左栏-->
+        <div class="left">
+            <ul class="cl">
+                <!--顶级分类-->
+                <li v-for="vo,index in menu" :class="{hidden:vo.hidden}">
+                    <a href="javascript:;" :class="{active:vo.active}" @click="onActive(index)">
+                        <i class="layui-icon" v-html="vo.icon"></i>
+                        <span v-text="vo.name"></span>
+                        <i class="layui-icon arrow" v-show="vo.url.length==0">&#xe61a;</i> <i v-show="vo.active"
+                                                                                              class="layui-icon active">&#xe623;</i>
+                    </a>
+                    <!--子级分类-->
+                    <div v-for="vo2,index2 in vo.list">
+                        <a href="javascript:;" :class="{active:vo2.active}" @click="onActive(index,index2)"
+                           v-text="vo2.name"></a>
+                        <i v-show="vo2.active" class="layui-icon active">&#xe623;</i>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <!--右侧-->
+        <div class="right">
+            <div style="padding: 20px; background-color: #F2F2F2;">
+                <div class="layui-row layui-col-space15">
+                    <div class="layui-col-md3">
+                        <div class="layui-card">
+                            <div class="layui-card-header">会员数量</div>
+                            <div id="count" class="layui-card-body" style="text-align: center; font-size: 40px;height: 80px;">
+                                0
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md3">
+                        <div class="layui-card">
+                            <div class="layui-card-header">会员余额</div>
+                            <div id="balance" class="layui-card-body" style="text-align: center; font-size: 40px;height: 80px">
+                                0
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md3">
+                        <div class="layui-card">
+                            <div class="layui-card-header">今日发送数量</div>
+                            <div id="today" class="layui-card-body"
+                                 style="text-align: center; font-size: 40px;height: 80px">
+                                0
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md3">
+                        <div class="layui-card">
+                            <div class="layui-card-header">总发送数量</div>
+                            <div id="total" class="layui-card-body"
+                                 style="text-align: center; font-size: 40px;height: 80px">
+                                0
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-row">
+                <div class="layui-col-md12" style="padding-right: 20px">
+                    <h2>最新短信</h2>
+
+                    <table class="layui-table layui-form" id="sms_table">
+
+                        <thead>
+                        <tr id="template">
+                            <th id="smsId">UID</th>
+                            <th id="sender">发送人</th>
+                            <th id="receiver">接收人</th>
+                            <th id="unitPrice">单价</th>
+                            <th id="content">内容</th>
+                            <th id="sendTime">发送时间</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./static/admin/js/config.js"></script>
+    <script src="./static/admin/js/script.js"></script>
+</body>
+</html>
